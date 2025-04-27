@@ -1,5 +1,4 @@
 name: CI/CD Pipeline
-
 on:
   push:
     branches: [main]
@@ -67,7 +66,7 @@ jobs:
           echo "CONVEX_DEPLOY_KEY is set to: ${{ secrets.CONVEX_DEPLOY_KEY }}"
 
       - name: Deploy Convex functions
-        run: npx convex deploy --prod --url https://ceaseless-tortoise-547.convex.cloud --yes --verbose
+        run: npx convex deploy --url https://ceaseless-tortoise-547.convex.cloud --yes --verbose
         env:
           CONVEX_DEPLOY_KEY: ${{ secrets.CONVEX_DEPLOY_KEY }}
 
