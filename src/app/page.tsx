@@ -1,6 +1,10 @@
 "use client";
+
 import { useQuery } from "convex/react";
 import { api } from "../../convex/_generated/api";
+
+  // Force dynamic rendering to avoid prerendering issues with useQuery
+  export const dynamic = "force-dynamic";
 
   export default function Home() {
     const message = useQuery(api.hello.hello);
