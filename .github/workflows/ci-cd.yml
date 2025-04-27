@@ -1,96 +1,104 @@
 name: CI/CD Pipeline
-
 on:
-  push:
-    branches: [main]
-  pull_request:
-    branches: [main]
-
+    push:
+      branches: [main]
+    pull_request:
+      branches: [main]
 jobs:
-  build-and-lint:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+    build-and-lint:
+      runs-on: ubuntu-latest
+      steps:
+        - name: Checkout
+          uses: actions/checkout@v4
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: "20"
-          cache: "npm"
+        - name: Set up Node.js
+          uses: actions/setup-node@v4
+          with:
+            node-version: '20'
+            cache: 'npm'
 
-      - name: Install Dependencies
-        run: npm ci
+        - name: Install Dependencies
+          run: npm ci
 
-      - name: Install Convex CLI
-        run: npm install -g convex@latest
+        - name: Install Convex CLI
+          run: npm install -g convex@latest
 
-      - name: Generate Convex Types
-        run: npx convex dev --once
-        env:
-          CONVEX_DEPLOY_KEY: ${{ secrets.CONVEX_DEPLOY_KEY }}
+        - name: Debug Convex Deploy Key
+          run: echo "CONVEX_DEPLOY_KEY is set to: $CONVEX_DEPLOY_KEY"
+          env:
+            CONVEX_DEPLOY_KEY: ${{ secrets.CONVEX_DEPLOY_KEY }}
 
-      - name: Run Linting
-        run: npm run lint
+        - name: Generate Convex Types
+          run: npx convex dev --once --url https://ceaseless-tortoise-547.convex.cloud
+          env:
+            CONVEX_DEPLOY_KEY: ${{ secrets.CONVEX_DEPLOY_KEY }}
 
-      - name: Build
-        run: npm run build
-        env:
-          NEXT_PUBLIC_CONVEX_URL: https://beaming-eagle-526.convex.cloud
+        - name: Run Linting
+          run: npm run lint
 
-  deploy-convex:
-    needs: build-and-lint
-    runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main'
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+        - name: Build
+          run: npm run build
+          env:
+            NEXT_PUBLIC_CONVEX_URL: https://ceaseless-tortoise-547.convex.cloud
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: "20"
-          cache: "npm"
+    deploy-convex:
+      needs: build-and-lint
+      runs-on: ubuntu-latest
+      if: github.ref == 'refs/heads/main'
+      steps:
+        - name: Checkout
+          uses: actions/checkout@v4
 
-      - name: Install Dependencies
-        run: npm ci
+        - name: Set up Node.js
+          uses: actions/setup-node@v4
+          with:
+            node-version: '20'
+            cache: 'npm'
 
-      - name: Install Convex CLI
-        run: npm install -g convex@latest
+        - name: Install Dependencies
+          run: npm ci
 
-      - name: Deploy Convex Functions
-        run: npx convex deploy --prod
-        env:
-          CONVEX_DEPLOY_KEY: ${{ secrets.CONVEX_DEPLOY_KEY }}
+        - name: Install Convex CLI
+          run: npm install -g convex@latest
 
-  deploy-vercel:
-    needs: [build-and-lint, deploy-convex]
-    runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main'
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+        - name: Debug Convex Deploy Key
+          run: echo "CONVEX_DEPLOY_KEY is set to: $CONVEX_DEPLOY_KEY"
+          env:
+            CONVEX_DEPLOY_KEY: ${{ secrets.CONVEX_DEPLOY_KEY }}
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: "20"
-          cache: "npm"
+        - name: Deploy Convex Functions
+          run: npx convex deploy --prod --url https://ceaseless-tortoise-547.convex.cloud --yes --verbose
+          env:
+            CONVEX_DEPLOY_KEY: ${{ secrets.CONVEX_DEPLOY_KEY }}
 
-      - name: Install Dependencies
-        run: npm ci
+    deploy-vercel:
+      needs: [build-and-lint, deploy-convex]
+      runs-on: ubuntu-latest
+      if: github.ref == 'refs/heads/main'
+      steps:
+        - name: Checkout
+          uses: actions/checkout@v4
 
-      - name: Install Vercel CLI
-        run: npm install --global vercel@latest
+        - name: Set up Node.js
+          uses: actions/setup-node@v4
+          with:
+            node-version: '20'
+            cache: 'npm'
 
-      - name: Pull Vercel Environment
-        run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+        - name: Install Dependencies
+          run: npm ci
 
-      - name: Build Project Artifacts
-        run: vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
+        - name: Install Vercel CLI
+          run: npm install --global vercel@latest
 
-      - name: Deploy to Vercel
-        run: vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}
-        env:
-          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+        - name: Pull Vercel Environment
+          run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+
+        - name: Build Project Artifacts
+          run: vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
+
+        - name: Deploy to Vercel
+          run: vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}
+          env:
+            VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+            VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
