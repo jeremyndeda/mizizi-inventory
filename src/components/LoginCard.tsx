@@ -1,16 +1,23 @@
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+  import { Input } from "@/components/ui/input";
+  import { Label } from "@/components/ui/label";
+  import Image from "next/image";
 
   export function LoginCard() {
     return (
       <div className="w-full max-w-md p-6 sm:p-8 space-y-6 bg-white rounded-lg shadow-md mx-4 sm:mx-auto">
+        <div className="flex justify-center">
+          <Image
+            src="/mizizi-learning-hub-logo.png"
+            alt="Mizizi Learning Hub Logo"
+            width={180}
+            height={120}
+            className="w-36 h-24 sm:w-48 sm:h-32 object-contain"
+          />
+        </div>
         <h2 className="text-xl sm:text-2xl font-bold text-center text-gray-900">
-          Welcome to Mizizi Inventory
+          Mizizi Inventory
         </h2>
-        <p className="text-center text-gray-600 text-sm sm:text-base">
-          Sign in to continue
-        </p>
         <div className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="email" className="text-sm font-medium text-gray-700">
