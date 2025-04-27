@@ -22,14 +22,49 @@ jobs:
       - name: Install Dependencies
         run: npm ci
 
+      - name: Install Convex CLI
+        run: npm install -g convex@latest
+
+      - name: Generate Convex Types
+        run: npx convex dev --once
+        env:
+          CONVEX_DEPLOY_KEY: ${{ secrets.CONVEX_DEPLOY_KEY }}
+
       - name: Run Linting
         run: npm run lint
 
       - name: Build
         run: npm run build
+        env:
+          NEXT_PUBLIC_CONVEX_URL: https://beaming-eagle-526.convex.cloud
 
-  deploy:
+  deploy-convex:
     needs: build-and-lint
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Install Convex CLI
+        run: npm install -g convex@latest
+
+      - name: Deploy Convex Functions
+        run: npx convex deploy --prod
+        env:
+          CONVEX_DEPLOY_KEY: ${{ secrets.CONVEX_DEPLOY_KEY }}
+
+  deploy-vercel:
+    needs: [build-and-lint, deploy-convex]
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main'
     steps:
